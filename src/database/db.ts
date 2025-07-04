@@ -57,30 +57,26 @@ export const connectDb = async (config: Config, createInstance = false) => {
 	let retries = 5
 	while (retries > 0) {
 		try {
-			await db.connect(config.surreal)
-			break
+			await db.connect(config.surreal, {
+				auth: {
+					username: config.username,
+					password: config.password,
+					namespace: config.ns,
+					database: config.db,
+				},
+			});
+			break;
 		} catch (error) {
-			console.log(`Connection failed. Retrying... (${retries} attempts left)`)
-			retries--
+			console.log(`Connection failed. Retrying... (${retries} attempts left)`);
+			retries--;
 			if (retries === 0) {
-				throw error
+				throw error;
 			}
-			await new Promise(resolve => setTimeout(resolve, 1000))
+			await new Promise((resolve) => setTimeout(resolve, 1000));
 		}
 	}
-
-	await db.use({
-		namespace: config.ns,
-		database: config.db,
-	})
-	await db.signin({
-		username: config.username,
-		password: config.password,
-		namespace: config.ns,
-		database: config.db,
-	})
-	console.log('Connected to database successfully')
-}
+	console.log("Connected to database successfully");
+};
 
 export const insertDefinitions = async (content: string) => {
 	const db = getDb()
